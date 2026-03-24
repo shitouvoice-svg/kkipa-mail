@@ -11,7 +11,8 @@
       </div>
       
       <div class="illustration-container">
-        <svg viewBox="0 0 400 400" width="100%" height="100%">
+        <svg viewBox="0 0 400 400" width="100%" height="100%" overflow="visible">
+          
           <rect x="100" y="110" width="90" height="240" fill="#6c38ff" />
           <g class="eyes purple-eyes">
             <template v-if="!isPwdFocused">
@@ -43,23 +44,6 @@
             </template>
           </g>
 
-          <path 
-            :d="isEmailFocused ? 'M 40 350 A 75 75 0 0 1 115 275 L 305 275 A 75 75 0 0 1 380 350 Z' : 'M 40 350 A 75 75 0 0 1 115 275 L 115 275 A 75 75 0 0 1 190 350 Z'" 
-            fill="#ff8a33" 
-            style="transition: d 0.4s ease, all 0.4s ease;" 
-          />
-          <g class="eyes orange-eyes" :class="{ 'blinking-eyes': isEmailFocused }" :style="{ transform: isEmailFocused ? 'translateX(190px)' : 'none', transition: 'transform 0.4s ease' }">
-            <template v-if="!isPwdFocused">
-              <circle cx="85" cy="300" r="4" fill="#000" />
-              <circle cx="120" cy="305" r="4" fill="#000" />
-            </template>
-            <template v-else>
-              <line x1="81" y1="300" x2="89" y2="300" stroke="#000" stroke-width="2" stroke-linecap="round"/>
-              <line x1="116" y1="305" x2="124" y2="305" stroke="#000" stroke-width="2" stroke-linecap="round"/>
-            </template>
-            <path d="M 95 315 Q 105 325 115 315" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
-          </g>
-
           <path d="M 205 350 L 205 240 A 32 32 0 0 1 269 240 L 269 350 Z" fill="#e8c300" />
           <g class="eyes yellow-eyes">
             <template v-if="!isPwdFocused">
@@ -71,6 +55,24 @@
               <path d="M 210 233 Q 220 243 230 233" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round"/>
             </template>
           </g>
+
+          <path 
+            :d="isEmailFocused ? 'M 40 350 A 75 75 0 0 1 115 275 L 330 275 A 75 75 0 0 1 405 350 Z' : 'M 40 350 A 75 75 0 0 1 115 275 L 115 275 A 75 75 0 0 1 190 350 Z'" 
+            fill="#ff8a33" 
+            style="transition: d 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), all 0.4s ease;" 
+          />
+          <g class="eyes orange-eyes" :class="{ 'blinking-eyes': isEmailFocused }" :style="{ transform: isEmailFocused ? 'translateX(215px)' : 'none', transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)' }">
+            <template v-if="!isPwdFocused">
+              <circle cx="85" cy="300" r="4" fill="#000" />
+              <circle cx="120" cy="305" r="4" fill="#000" />
+            </template>
+            <template v-else>
+              <line x1="81" y1="300" x2="89" y2="300" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+              <line x1="116" y1="305" x2="124" y2="305" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+            </template>
+            <path d="M 95 315 Q 105 325 115 315" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
+          </g>
+
         </svg>
       </div>
     </div>
@@ -89,15 +91,17 @@
         </div>
         
         <h1 class="form-title">{{ settingStore.settings.title || 'Welcome back!' }}</h1>
-        <p class="form-desc" v-if="show === 'login'">{{ $t('loginTitle') || 'Please enter your details' }}</p>
-        <p class="form-desc" v-else>{{ $t('regTitle') || 'Create a new account' }}</p>
+        
+        <div class="interactive-hint" :class="{ 'is-pwd': isPwdFocused, 'is-email': isEmailFocused }">
+          {{ hintText }}
+        </div>
 
         <div v-show="show === 'login'" class="form-content">
           <div class="input-group">
             <label>Email</label>
             <el-input :class="settingStore.settings.loginDomain === 0 ? 'email-input' : ''" v-model="form.email"
                       type="text" :placeholder="$t('emailAccount')" autocomplete="off"
-                      @focus="isEmailFocused = true" @blur="isEmailFocused = false">
+                      @focus="setFocus('email')" @blur="clearFocus">
               <template #append v-if="settingStore.settings.loginDomain === 0">
                 <div @click.stop="openSelect" class="append-wrap">
                   <el-select
@@ -125,8 +129,8 @@
               :placeholder="$t('password')" 
               type="password" 
               autocomplete="off"
-              @focus="isPwdFocused = true"
-              @blur="isPwdFocused = false"
+              @focus="setFocus('pwd')"
+              @blur="clearFocus"
             ></el-input>
           </div>
 
@@ -145,9 +149,9 @@
 
         <div v-show="show !== 'login'" class="form-content">
           <div class="input-group">
-            <label>Email</label>
+            <label>Email Prefix</label>
             <el-input class="email-input" v-model="registerForm.email" type="text" :placeholder="$t('emailAccount')" autocomplete="off"
-                      @focus="isEmailFocused = true" @blur="isEmailFocused = false">
+                      @focus="setFocus('email')" @blur="clearFocus">
               <template #append>
                 <div @click.stop="openSelect" class="append-wrap">
                   <el-select
@@ -175,8 +179,8 @@
               :placeholder="$t('password')" 
               type="password" 
               autocomplete="off"
-              @focus="isPwdFocused = true"
-              @blur="isPwdFocused = false"
+              @focus="setFocus('pwd')"
+              @blur="clearFocus"
             />
           </div>
 
@@ -187,13 +191,13 @@
               :placeholder="$t('confirmPwd')" 
               type="password"
               autocomplete="off"
-              @focus="isPwdFocused = true"
-              @blur="isPwdFocused = false"
+              @focus="setFocus('pwd')"
+              @blur="clearFocus"
             />
           </div>
 
-          <el-input v-if="settingStore.settings.regKey === 0" v-model="registerForm.code" :placeholder="$t('regKey')" type="text" autocomplete="off" class="mb-3" @focus="isEmailFocused = true" @blur="isEmailFocused = false"/>
-          <el-input v-if="settingStore.settings.regKey === 2" v-model="registerForm.code" :placeholder="$t('regKeyOptional')" type="text" autocomplete="off" class="mb-3" @focus="isEmailFocused = true" @blur="isEmailFocused = false"/>
+          <el-input v-if="settingStore.settings.regKey === 0" v-model="registerForm.code" :placeholder="$t('regKey')" type="text" autocomplete="off" class="mb-3" @focus="setFocus('code')" @blur="clearFocus"/>
+          <el-input v-if="settingStore.settings.regKey === 2" v-model="registerForm.code" :placeholder="$t('regKeyOptional')" type="text" autocomplete="off" class="mb-3" @focus="setFocus('code')" @blur="clearFocus"/>
           
           <div v-show="verifyShow" class="register-turnstile"
                :data-sitekey="settingStore.settings.siteKey"
@@ -270,7 +274,41 @@ const uiStore = useUiStore();
 const settingStore = useSettingStore();
 
 const isPwdFocused = ref(false);
-const isEmailFocused = ref(false); // 新增用于绑定输入邮箱（或注册码）时的变长动画状态
+const isEmailFocused = ref(false); 
+const currentFocus = ref(''); // 记录当前聚焦点：'email', 'pwd', 'code'
+
+// 集中管理焦点状态的方法
+const setFocus = (type) => {
+  currentFocus.value = type;
+  if (type === 'pwd') {
+    isPwdFocused.value = true;
+    isEmailFocused.value = false;
+  } else {
+    // 点击 email 和 code 都会触发橙色怪兽的互动
+    isPwdFocused.value = false;
+    isEmailFocused.value = true;
+  }
+};
+
+const clearFocus = () => {
+  currentFocus.value = '';
+  isPwdFocused.value = false;
+  isEmailFocused.value = false;
+};
+
+// 根据当前页面(登录/注册)和焦点状态，计算出动态互动的提示文案
+const hintText = computed(() => {
+  if (show.value === 'login') {
+    if (isPwdFocused.value) return "输入密码中... 放心，我们会闭上眼睛不偷看的 🙈";
+    if (isEmailFocused.value) return "正在输入账号... 我们在旁边看着你哦 👀";
+    return "Hi，欢迎回来！请输入您的账号和密码进行登录 ✨";
+  } else {
+    if (currentFocus.value === 'code') return "最后一步啦！填入你的专属注册码，开启新世界的大门 🗝️";
+    if (isPwdFocused.value) return "密码要牢记哦，设置一个只有你自己知道的秘密吧 🙈";
+    if (isEmailFocused.value) return "想要一个什么样的高级邮箱前缀呢？想一个特别的吧 💡";
+    return "欢迎加入！请先获取注册码，然后依次设置前缀、密码并填入注册码即可！ 🚀";
+  }
+});
 
 const loginLoading = ref(false)
 const bindLoading = ref(false)
@@ -612,6 +650,34 @@ function submitRegister() {
   }
 }
 
+/* 互动温馨提示框的样式 */
+.interactive-hint {
+  font-size: 13px;
+  color: #555;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 25px;
+  text-align: center;
+  line-height: 1.5;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform-origin: top center;
+
+  /* 被激活变色，增加趣味性 */
+  &.is-email {
+    background: rgba(255, 138, 51, 0.08); /* 配合橙色怪兽 */
+    border-color: rgba(255, 138, 51, 0.3);
+    color: #e67300;
+  }
+  
+  &.is-pwd {
+    background: rgba(0, 0, 0, 0.03); /* 配合黑色/闭眼状态 */
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #333;
+  }
+}
+
 .home-link {
   position: absolute;
   top: 30px;
@@ -659,14 +725,7 @@ function submitRegister() {
   font-weight: 700;
   text-align: center;
   color: var(--el-text-color-primary);
-  margin-bottom: 8px;
-}
-
-.form-desc {
-  font-size: 14px;
-  text-align: center;
-  color: #888;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .input-group {
@@ -742,7 +801,6 @@ function submitRegister() {
   font-size: 14px;
   color: #666;
 
-  /* 更新了更专业的底部连接蓝色样式 */
   span {
     color: #1890ff; 
     font-weight: 600;
