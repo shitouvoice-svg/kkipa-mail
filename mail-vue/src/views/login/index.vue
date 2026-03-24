@@ -13,7 +13,8 @@
       <div class="illustration-container">
         
         <div class="hint-bubble" :class="isEmailFocused ? 'hint-inside' : 'hint-floating'">
-          {{ hintText }}
+          <Icon :icon="hintInfo.icon" width="18" height="18" />
+          <span>{{ hintInfo.text }}</span>
         </div>
 
         <svg viewBox="0 0 400 400" width="100%" height="100%" overflow="visible">
@@ -96,7 +97,8 @@
         <h1 class="form-title">{{ settingStore.settings.title || 'Welcome back!' }}</h1>
         
         <div class="mobile-interactive-hint" :class="{ 'is-pwd': isPwdFocused, 'is-email': isEmailFocused }">
-          {{ hintText }}
+          <Icon :icon="hintInfo.icon" width="16" height="16" />
+          <span>{{ hintInfo.text }}</span>
         </div>
 
         <div v-show="show === 'login'" class="form-content">
@@ -280,14 +282,12 @@ const isPwdFocused = ref(false);
 const isEmailFocused = ref(false); 
 const currentFocus = ref(''); 
 
-// 焦点管理器
 const setFocus = (type) => {
   currentFocus.value = type;
   if (type === 'pwd') {
     isPwdFocused.value = true;
     isEmailFocused.value = false;
   } else {
-    // 账号输入和注册码输入时，小怪兽都会拉长
     isPwdFocused.value = false;
     isEmailFocused.value = true;
   }
@@ -299,17 +299,17 @@ const clearFocus = () => {
   isEmailFocused.value = false;
 };
 
-// 极简横排交互文案（确保不会换行，文字精简）
-const hintText = computed(() => {
+// 彻底禁止 emoji，改为返回专业图标 icon 和精简后的纯文本 text
+const hintInfo = computed(() => {
   if (show.value === 'login') {
-    if (isPwdFocused.value) return "闭眼啦 🙈 放心输入你的密码吧";
-    if (isEmailFocused.value) return "输入账号中... 我们在看着哦 👀";
-    return "欢迎回来！请输入账号和密码 ✨";
+    if (isPwdFocused.value) return { text: "闭眼啦，放心输入你的密码吧", icon: "mingcute:eye-close-fill" };
+    if (isEmailFocused.value) return { text: "输入账号中... 我们在看着哦", icon: "mingcute:eye-2-fill" };
+    return { text: "欢迎回来！请输入账号和密码", icon: "mingcute:sparkles-fill" };
   } else {
-    if (currentFocus.value === 'code') return "最后一步: 填入专属注册码开启大门 🗝️";
-    if (isPwdFocused.value) return "设个密码吧 🙈 我们绝不偷看";
-    if (isEmailFocused.value) return "想个特别的前缀... 越简短越好记 💡";
-    return "欢迎！第一步: 先想一个邮箱前缀 🚀";
+    if (currentFocus.value === 'code') return { text: "最后一步: 填入专属注册码开启大门", icon: "mingcute:key-2-fill" };
+    if (isPwdFocused.value) return { text: "设个密码吧，我们绝不偷看", icon: "mingcute:eye-close-fill" };
+    if (isEmailFocused.value) return { text: "想个特别的前缀... 越简短越好记", icon: "mingcute:bulb-fill" };
+    return { text: "欢迎！第一步: 先想一个邮箱前缀", icon: "mingcute:send-plane-fill" };
   }
 });
 
@@ -625,22 +625,23 @@ function submitRegister() {
 }
 
 /* ==========================================
-   精心设计的动态悬浮文字（核心排版区）
+   精心调整的动态悬浮文字（解决遮挡问题）
    ========================================== */
 .hint-bubble {
   position: absolute;
   z-index: 20;
-  white-space: nowrap; /* 绝对不换行 */
+  white-space: nowrap; /* 绝对禁止换行 */
   display: flex;
   align-items: center;
+  gap: 8px; /* 专业图标与文字的间距 */
   pointer-events: none;
   transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 状态1：悬浮在天空时的样式 (毛玻璃气泡) */
 .hint-floating {
-  left: 6%;
-  top: 55%;
+  left: 50%;
+  top: 52%;
+  transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
   padding: 8px 18px;
@@ -650,13 +651,13 @@ function submitRegister() {
   font-size: 14px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.06);
   border: 1px solid rgba(255,255,255,0.5);
-  transform: translateY(0);
 }
 
-/* 状态2：掉入怪物肚子里的样式 (完美贴合在橙色上) */
+/* 状态2：掉入怪物肚子里，利用绝对定位和 transform 完美居中于空白区域，永不遮挡 */
 .hint-inside {
-  left: 10%;
-  top: 77%; /* 精确下坠到橙色怪兽身体中央 */
+  left: 45%; /* 精确在橙色怪物拉长后的左侧空白部分居中 */
+  top: 78%; 
+  transform: translateX(-50%);
   background: transparent;
   padding: 8px 0;
   color: #ffffff;
@@ -666,7 +667,6 @@ function submitRegister() {
   border: 1px solid transparent;
   box-shadow: none;
   text-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transform: translateY(0);
 }
 
 .blinking-eyes circle {
@@ -697,9 +697,11 @@ function submitRegister() {
   }
 }
 
-/* 移动端专属提示（窄屏时左侧怪兽消失，用这个顶替） */
 .mobile-interactive-hint {
   display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-size: 13px;
   color: #555;
   background: #f5f7fa;
@@ -724,7 +726,7 @@ function submitRegister() {
   }
 
   @media (max-width: 850px) {
-    display: block; /* 仅在手机端显示 */
+    display: flex; /* 仅在手机端显示此提示框 */
   }
 }
 
