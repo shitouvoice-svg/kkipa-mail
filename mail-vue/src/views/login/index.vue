@@ -24,6 +24,7 @@
             <template v-else>
               <path d="M 111 130 Q 115 126 119 130" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round"/>
               <path d="M 135 125 Q 138 122 141 125" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M 120 138 Q 124 144 128 138" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/>
             </template>
           </g>
 
@@ -38,20 +39,25 @@
             <template v-else>
                <path d="M 171 180 Q 175 176 179 180" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
                <path d="M 184 183 Q 188 179 192 183" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+               <path d="M 176 188 Q 180 194 184 188" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
             </template>
           </g>
 
-          <path d="M 40 350 A 75 75 0 0 1 190 350 Z" fill="#ff8a33"/>
-          <g class="eyes orange-eyes">
+          <path 
+            :d="isEmailFocused ? 'M 40 350 A 75 75 0 0 1 115 275 L 305 275 A 75 75 0 0 1 380 350 Z' : 'M 40 350 A 75 75 0 0 1 115 275 L 115 275 A 75 75 0 0 1 190 350 Z'" 
+            fill="#ff8a33" 
+            style="transition: d 0.4s ease, all 0.4s ease;" 
+          />
+          <g class="eyes orange-eyes" :class="{ 'blinking-eyes': isEmailFocused }" :style="{ transform: isEmailFocused ? 'translateX(190px)' : 'none', transition: 'transform 0.4s ease' }">
             <template v-if="!isPwdFocused">
               <circle cx="85" cy="300" r="4" fill="#000" />
               <circle cx="120" cy="305" r="4" fill="#000" />
-              <path d="M 95 315 Q 105 325 115 315" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
             </template>
             <template v-else>
               <line x1="81" y1="300" x2="89" y2="300" stroke="#000" stroke-width="2" stroke-linecap="round"/>
               <line x1="116" y1="305" x2="124" y2="305" stroke="#000" stroke-width="2" stroke-linecap="round"/>
             </template>
+            <path d="M 95 315 Q 105 325 115 315" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
           </g>
 
           <path d="M 205 350 L 205 240 A 32 32 0 0 1 269 240 L 269 350 Z" fill="#e8c300" />
@@ -62,7 +68,7 @@
             </template>
             <template v-else>
               <line x1="230" y1="225" x2="236" y2="225" stroke="#000" stroke-width="2" stroke-linecap="round"/>
-              <line x1="205" y1="238" x2="235" y2="238" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+              <path d="M 210 233 Q 220 243 230 233" stroke="#000" stroke-width="2" fill="none" stroke-linecap="round"/>
             </template>
           </g>
         </svg>
@@ -90,7 +96,8 @@
           <div class="input-group">
             <label>Email</label>
             <el-input :class="settingStore.settings.loginDomain === 0 ? 'email-input' : ''" v-model="form.email"
-                      type="text" :placeholder="$t('emailAccount')" autocomplete="off">
+                      type="text" :placeholder="$t('emailAccount')" autocomplete="off"
+                      @focus="isEmailFocused = true" @blur="isEmailFocused = false">
               <template #append v-if="settingStore.settings.loginDomain === 0">
                 <div @click.stop="openSelect" class="append-wrap">
                   <el-select
@@ -100,12 +107,7 @@
                       :placeholder="$t('select')"
                       class="select"
                   >
-                    <el-option
-                        v-for="item in domainList"
-                        :key="item"
-                        :label="item"
-                        :value="item"
-                    />
+                    <el-option v-for="item in domainList" :key="item" :label="item" :value="item" />
                   </el-select>
                   <div class="suffix-display">
                     <span>{{ suffix }}</span>
@@ -144,7 +146,8 @@
         <div v-show="show !== 'login'" class="form-content">
           <div class="input-group">
             <label>Email</label>
-            <el-input class="email-input" v-model="registerForm.email" type="text" :placeholder="$t('emailAccount')" autocomplete="off">
+            <el-input class="email-input" v-model="registerForm.email" type="text" :placeholder="$t('emailAccount')" autocomplete="off"
+                      @focus="isEmailFocused = true" @blur="isEmailFocused = false">
               <template #append>
                 <div @click.stop="openSelect" class="append-wrap">
                   <el-select
@@ -154,12 +157,7 @@
                       :placeholder="$t('select')"
                       class="select"
                   >
-                    <el-option
-                        v-for="item in domainList"
-                        :key="item"
-                        :label="item"
-                        :value="item"
-                    />
+                    <el-option v-for="item in domainList" :key="item" :label="item" :value="item" />
                   </el-select>
                   <div class="suffix-display">
                     <span>{{ suffix }}</span>
@@ -194,8 +192,8 @@
             />
           </div>
 
-          <el-input v-if="settingStore.settings.regKey === 0" v-model="registerForm.code" :placeholder="$t('regKey')" type="text" autocomplete="off" class="mb-3"/>
-          <el-input v-if="settingStore.settings.regKey === 2" v-model="registerForm.code" :placeholder="$t('regKeyOptional')" type="text" autocomplete="off" class="mb-3"/>
+          <el-input v-if="settingStore.settings.regKey === 0" v-model="registerForm.code" :placeholder="$t('regKey')" type="text" autocomplete="off" class="mb-3" @focus="isEmailFocused = true" @blur="isEmailFocused = false"/>
+          <el-input v-if="settingStore.settings.regKey === 2" v-model="registerForm.code" :placeholder="$t('regKeyOptional')" type="text" autocomplete="off" class="mb-3" @focus="isEmailFocused = true" @blur="isEmailFocused = false"/>
           
           <div v-show="verifyShow" class="register-turnstile"
                :data-sitekey="settingStore.settings.siteKey"
@@ -272,6 +270,7 @@ const uiStore = useUiStore();
 const settingStore = useSettingStore();
 
 const isPwdFocused = ref(false);
+const isEmailFocused = ref(false); // 新增用于绑定输入邮箱（或注册码）时的变长动画状态
 
 const loginLoading = ref(false)
 const bindLoading = ref(false)
@@ -584,9 +583,21 @@ function submitRegister() {
   }
 }
 
+/* 橙色怪兽专用的眨眼动画 */
+.blinking-eyes circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 2.5s infinite;
+}
+
+@keyframes blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
 .split-right {
   width: 500px;
-  position: relative; /* 为右上角的Home按钮定位提供支持 */
+  position: relative; 
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -601,7 +612,6 @@ function submitRegister() {
   }
 }
 
-/* 优化后的主页按钮样式 */
 .home-link {
   position: absolute;
   top: 30px;
@@ -732,13 +742,16 @@ function submitRegister() {
   font-size: 14px;
   color: #666;
 
+  /* 更新了更专业的底部连接蓝色样式 */
   span {
-    color: #1a1a1a;
+    color: #1890ff; 
     font-weight: 600;
     cursor: pointer;
     margin-left: 4px;
+    transition: color 0.3s ease;
     
     &:hover {
+      color: #40a9ff;
       text-decoration: underline;
     }
   }
