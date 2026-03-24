@@ -11,8 +11,12 @@
       </div>
       
       <div class="illustration-container">
+        
+        <div class="hint-bubble" :class="isEmailFocused ? 'hint-inside' : 'hint-floating'">
+          {{ hintText }}
+        </div>
+
         <svg viewBox="0 0 400 400" width="100%" height="100%" overflow="visible">
-          
           <rect x="100" y="110" width="90" height="240" fill="#6c38ff" />
           <g class="eyes purple-eyes">
             <template v-if="!isPwdFocused">
@@ -57,11 +61,11 @@
           </g>
 
           <path 
-            :d="isEmailFocused ? 'M 40 350 A 75 75 0 0 1 115 275 L 330 275 A 75 75 0 0 1 405 350 Z' : 'M 40 350 A 75 75 0 0 1 115 275 L 115 275 A 75 75 0 0 1 190 350 Z'" 
+            :d="isEmailFocused ? 'M 40 350 A 75 75 0 0 1 115 275 L 340 275 A 75 75 0 0 1 415 350 Z' : 'M 40 350 A 75 75 0 0 1 115 275 L 115 275 A 75 75 0 0 1 190 350 Z'" 
             fill="#ff8a33" 
-            style="transition: d 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), all 0.4s ease;" 
+            style="transition: d 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), all 0.5s ease;" 
           />
-          <g class="eyes orange-eyes" :class="{ 'blinking-eyes': isEmailFocused }" :style="{ transform: isEmailFocused ? 'translateX(215px)' : 'none', transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)' }">
+          <g class="eyes orange-eyes" :class="{ 'blinking-eyes': isEmailFocused }" :style="{ transform: isEmailFocused ? 'translateX(250px)' : 'none', transition: 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)' }">
             <template v-if="!isPwdFocused">
               <circle cx="85" cy="300" r="4" fill="#000" />
               <circle cx="120" cy="305" r="4" fill="#000" />
@@ -72,7 +76,6 @@
             </template>
             <path d="M 95 315 Q 105 325 115 315" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
           </g>
-
         </svg>
       </div>
     </div>
@@ -92,7 +95,7 @@
         
         <h1 class="form-title">{{ settingStore.settings.title || 'Welcome back!' }}</h1>
         
-        <div class="interactive-hint" :class="{ 'is-pwd': isPwdFocused, 'is-email': isEmailFocused }">
+        <div class="mobile-interactive-hint" :class="{ 'is-pwd': isPwdFocused, 'is-email': isEmailFocused }">
           {{ hintText }}
         </div>
 
@@ -275,16 +278,16 @@ const settingStore = useSettingStore();
 
 const isPwdFocused = ref(false);
 const isEmailFocused = ref(false); 
-const currentFocus = ref(''); // 记录当前聚焦点：'email', 'pwd', 'code'
+const currentFocus = ref(''); 
 
-// 集中管理焦点状态的方法
+// 焦点管理器
 const setFocus = (type) => {
   currentFocus.value = type;
   if (type === 'pwd') {
     isPwdFocused.value = true;
     isEmailFocused.value = false;
   } else {
-    // 点击 email 和 code 都会触发橙色怪兽的互动
+    // 账号输入和注册码输入时，小怪兽都会拉长
     isPwdFocused.value = false;
     isEmailFocused.value = true;
   }
@@ -296,17 +299,17 @@ const clearFocus = () => {
   isEmailFocused.value = false;
 };
 
-// 根据当前页面(登录/注册)和焦点状态，计算出动态互动的提示文案
+// 极简横排交互文案（确保不会换行，文字精简）
 const hintText = computed(() => {
   if (show.value === 'login') {
-    if (isPwdFocused.value) return "输入密码中... 放心，我们会闭上眼睛不偷看的 🙈";
-    if (isEmailFocused.value) return "正在输入账号... 我们在旁边看着你哦 👀";
-    return "Hi，欢迎回来！请输入您的账号和密码进行登录 ✨";
+    if (isPwdFocused.value) return "闭眼啦 🙈 放心输入你的密码吧";
+    if (isEmailFocused.value) return "输入账号中... 我们在看着哦 👀";
+    return "欢迎回来！请输入账号和密码 ✨";
   } else {
-    if (currentFocus.value === 'code') return "最后一步啦！填入你的专属注册码，开启新世界的大门 🗝️";
-    if (isPwdFocused.value) return "密码要牢记哦，设置一个只有你自己知道的秘密吧 🙈";
-    if (isEmailFocused.value) return "想要一个什么样的高级邮箱前缀呢？想一个特别的吧 💡";
-    return "欢迎加入！请先获取注册码，然后依次设置前缀、密码并填入注册码即可！ 🚀";
+    if (currentFocus.value === 'code') return "最后一步: 填入专属注册码开启大门 🗝️";
+    if (isPwdFocused.value) return "设个密码吧 🙈 我们绝不偷看";
+    if (isEmailFocused.value) return "想个特别的前缀... 越简短越好记 💡";
+    return "欢迎！第一步: 先想一个邮箱前缀 🚀";
   }
 });
 
@@ -610,18 +613,62 @@ function submitRegister() {
 .illustration-container {
   width: 500px;
   height: 500px;
+  position: relative;
   z-index: 10;
   
   svg {
     transition: all 0.3s ease;
   }
-  
   .eyes path, .eyes line {
     transition: all 0.2s ease;
   }
 }
 
-/* 橙色怪兽专用的眨眼动画 */
+/* ==========================================
+   精心设计的动态悬浮文字（核心排版区）
+   ========================================== */
+.hint-bubble {
+  position: absolute;
+  z-index: 20;
+  white-space: nowrap; /* 绝对不换行 */
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 状态1：悬浮在天空时的样式 (毛玻璃气泡) */
+.hint-floating {
+  left: 6%;
+  top: 55%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 8px 18px;
+  border-radius: 20px;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  border: 1px solid rgba(255,255,255,0.5);
+  transform: translateY(0);
+}
+
+/* 状态2：掉入怪物肚子里的样式 (完美贴合在橙色上) */
+.hint-inside {
+  left: 10%;
+  top: 77%; /* 精确下坠到橙色怪兽身体中央 */
+  background: transparent;
+  padding: 8px 0;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transform: translateY(0);
+}
+
 .blinking-eyes circle {
   transform-box: fill-box;
   transform-origin: center;
@@ -650,8 +697,9 @@ function submitRegister() {
   }
 }
 
-/* 互动温馨提示框的样式 */
-.interactive-hint {
+/* 移动端专属提示（窄屏时左侧怪兽消失，用这个顶替） */
+.mobile-interactive-hint {
+  display: none;
   font-size: 13px;
   color: #555;
   background: #f5f7fa;
@@ -661,20 +709,22 @@ function submitRegister() {
   margin-bottom: 25px;
   text-align: center;
   line-height: 1.5;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  transform-origin: top center;
+  transition: all 0.3s ease;
 
-  /* 被激活变色，增加趣味性 */
   &.is-email {
-    background: rgba(255, 138, 51, 0.08); /* 配合橙色怪兽 */
+    background: rgba(255, 138, 51, 0.08); 
     border-color: rgba(255, 138, 51, 0.3);
     color: #e67300;
   }
   
   &.is-pwd {
-    background: rgba(0, 0, 0, 0.03); /* 配合黑色/闭眼状态 */
+    background: rgba(0, 0, 0, 0.03); 
     border-color: rgba(0, 0, 0, 0.1);
     color: #333;
+  }
+
+  @media (max-width: 850px) {
+    display: block; /* 仅在手机端显示 */
   }
 }
 
