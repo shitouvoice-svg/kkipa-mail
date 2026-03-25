@@ -9,6 +9,10 @@
         <div class="x4 cloud"></div>
         <div class="x5 cloud"></div>
       </div>
+
+      <div class="copyright">
+        © 2026 Secure Mail System. All rights reserved.
+      </div>
       
       <div class="illustration-container">
         
@@ -357,7 +361,7 @@ const clearFocus = () => {
 const hintInfo = computed(() => {
   if (show.value === 'login') {
     if (isPwdFocused.value) return { text: "闭眼啦，放心输入你的密码吧", icon: "mingcute:eye-close-fill" };
-    if (isEmailFocused.value) return { text: "输入账号中... 我们在看着哦", icon: "mingcute:eye-2-fill" };
+    if (isEmailFocused.value) return { text: "输入账号中... 不要输错哦", icon: "mingcute:eye-2-fill" };
     return { text: "欢迎回来！请输入账号和密码", icon: "mingcute:sparkles-fill" };
   } else {
     if (currentFocus.value === 'code') return { text: "最后一步: 填入专属注册码开启大门", icon: "mingcute:key-2-fill" };
@@ -664,6 +668,19 @@ function submitRegister() {
   }
 }
 
+/* 底部版权信息 */
+.copyright {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.5px;
+  z-index: 10;
+  pointer-events: none;
+}
+
 .illustration-container {
   width: 500px;
   height: 500px;
@@ -689,10 +706,10 @@ function submitRegister() {
   transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* ★ 再次优化：位置提高到 6%，绝对安全高度，彻底杜绝与下方的弹跳精灵遮挡 ★ */
+/* ★ 彻底解决与小精灵的遮挡：位置大幅提高到了 -10% ★ */
 .hint-floating {
   left: 50%;
-  top: 6%; 
+  top: -10%; 
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
