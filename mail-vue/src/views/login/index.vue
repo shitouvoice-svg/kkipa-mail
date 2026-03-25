@@ -100,7 +100,6 @@
               </g>
             </g>
           </g>
-
         </svg>
       </div>
     </div>
@@ -156,11 +155,20 @@
             <el-input 
               v-model="form.password" 
               :placeholder="$t('password')" 
-              type="password" 
+              :type="showLoginPwd ? 'text' : 'password'" 
               autocomplete="off"
               @focus="setFocus('pwd')"
               @blur="clearFocus"
-            ></el-input>
+            >
+              <template #suffix>
+                <Icon 
+                  :icon="showLoginPwd ? 'mingcute:eye-2-line' : 'mingcute:eye-close-line'" 
+                  class="pwd-eye-icon" 
+                  @click.stop="showLoginPwd = !showLoginPwd" 
+                  @mousedown.prevent
+                />
+              </template>
+            </el-input>
           </div>
 
           <div class="form-options">
@@ -206,11 +214,20 @@
             <el-input 
               v-model="registerForm.password" 
               :placeholder="$t('password')" 
-              type="password" 
+              :type="showRegPwd ? 'text' : 'password'" 
               autocomplete="off"
               @focus="setFocus('pwd')"
               @blur="clearFocus"
-            />
+            >
+              <template #suffix>
+                <Icon 
+                  :icon="showRegPwd ? 'mingcute:eye-2-line' : 'mingcute:eye-close-line'" 
+                  class="pwd-eye-icon" 
+                  @click.stop="showRegPwd = !showRegPwd" 
+                  @mousedown.prevent
+                />
+              </template>
+            </el-input>
           </div>
 
           <div class="input-group">
@@ -218,11 +235,20 @@
             <el-input 
               v-model="registerForm.confirmPassword" 
               :placeholder="$t('confirmPwd')" 
-              type="password"
+              :type="showRegConfirmPwd ? 'text' : 'password'"
               autocomplete="off"
               @focus="setFocus('pwd')"
               @blur="clearFocus"
-            />
+            >
+              <template #suffix>
+                <Icon 
+                  :icon="showRegConfirmPwd ? 'mingcute:eye-2-line' : 'mingcute:eye-close-line'" 
+                  class="pwd-eye-icon" 
+                  @click.stop="showRegConfirmPwd = !showRegConfirmPwd" 
+                  @mousedown.prevent
+                />
+              </template>
+            </el-input>
           </div>
 
           <el-input v-if="settingStore.settings.regKey === 0" v-model="registerForm.code" :placeholder="$t('regKey')" type="text" autocomplete="off" class="mb-3" @focus="setFocus('code')" @blur="clearFocus"/>
@@ -305,6 +331,11 @@ const settingStore = useSettingStore();
 const isPwdFocused = ref(false);
 const isEmailFocused = ref(false); 
 const currentFocus = ref(''); 
+
+// 控制密码可见性的状态
+const showLoginPwd = ref(false);
+const showRegPwd = ref(false);
+const showRegConfirmPwd = ref(false);
 
 const setFocus = (type) => {
   currentFocus.value = type;
@@ -647,9 +678,6 @@ function submitRegister() {
   }
 }
 
-/* ==========================================
-   精心调整的动态悬浮文字（完美上移解决遮挡）
-   ========================================== */
 .hint-bubble {
   position: absolute;
   z-index: 20;
@@ -661,10 +689,10 @@ function submitRegister() {
   transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* ★ 关键优化：位置已从 52% 大幅提高到了 15% 位于天空部分 ★ */
+/* ★ 再次优化：位置提高到 6%，绝对安全高度，彻底杜绝与下方的弹跳精灵遮挡 ★ */
 .hint-floating {
   left: 50%;
-  top: 15%; 
+  top: 6%; 
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
@@ -692,31 +720,25 @@ function submitRegister() {
   text-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-/* ==========================================
-   博士帽小玩偶 - 跑酷与弹跳双轨动画系统
-   ========================================== */
 .doll-run {
-  /* 轨道 1：沿着三个怪兽的头顶平滑穿梭 */
   animation: doll-run 3.5s infinite alternate ease-in-out;
 }
 
 .doll-bounce {
-  /* 轨道 2：模拟重力的弹跳效果 */
   animation: doll-bounce 0.45s infinite alternate ease-out;
 }
 
 @keyframes doll-run {
-  0% { transform: translate(145px, 95px); }    /* 紫色怪兽上方 */
-  50% { transform: translate(192px, 145px); }  /* 黑色怪兽上方 */
-  100% { transform: translate(237px, 220px); } /* 黄色怪兽上方 */
+  0% { transform: translate(145px, 95px); }    
+  50% { transform: translate(192px, 145px); }  
+  100% { transform: translate(237px, 220px); } 
 }
 
 @keyframes doll-bounce {
   0% { transform: translateY(0); }
-  100% { transform: translateY(-40px); } /* 向上跳跃高度 */
+  100% { transform: translateY(-40px); } 
 }
 
-/* 小精灵头上的交互气泡样式 */
 .doll-speech-wrapper {
   display: flex;
   justify-content: center;
@@ -738,7 +760,7 @@ function submitRegister() {
   position: relative;
   box-shadow: 0 4px 12px rgba(24,144,255,0.3);
   transition: all 0.2s ease;
-  pointer-events: auto; /* 允许在这个 SVG 内使用 Hover 和 Click */
+  pointer-events: auto; 
 }
 .doll-speech-bubble:hover {
   transform: scale(1.05) translateY(-2px);
@@ -896,6 +918,18 @@ function submitRegister() {
   
   :deep(.el-input__inner) {
     height: 38px;
+  }
+}
+
+/* 密码输入框的眼睛图标样式 */
+.pwd-eye-icon {
+  cursor: pointer;
+  color: #999;
+  font-size: 18px;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: #333;
   }
 }
 
