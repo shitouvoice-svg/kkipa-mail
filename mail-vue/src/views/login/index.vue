@@ -77,6 +77,30 @@
             </template>
             <path d="M 95 315 Q 105 325 115 315" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
           </g>
+
+          <g class="doctor-doll" v-show="show === 'login' && !isEmailFocused">
+            <g class="doll-run">
+              <g class="doll-bounce">
+                <foreignObject x="-80" y="-70" width="160" height="50" style="overflow: visible;">
+                  <div class="doll-speech-wrapper">
+                    <div class="doll-speech-bubble" @click.stop="show = 'register'">
+                      <Icon icon="mingcute:user-add-fill" width="14" height="14" style="margin-right: 4px;" />
+                      点击 Sign Up 注册！
+                    </div>
+                  </div>
+                </foreignObject>
+                <path d="M 0 -18 L 16 -12 L 0 -6 L -16 -12 Z" fill="#1a1a1a"/>
+                <path d="M -8 -9 L -8 -3 Q 0 2 8 -3 L 8 -9 Z" fill="#1a1a1a"/>
+                <line x1="0" y1="-12" x2="16" y2="-2" stroke="#e8c300" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="16" cy="-2" r="2" fill="#e8c300"/>
+                <circle cx="0" cy="5" r="10" fill="#fff" stroke="#1a1a1a" stroke-width="2.5"/>
+                <circle cx="-3" cy="3" r="1.5" fill="#1a1a1a"/>
+                <circle cx="3" cy="3" r="1.5" fill="#1a1a1a"/>
+                <path d="M -2 6 Q 0 8 2 6" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+              </g>
+            </g>
+          </g>
+
         </svg>
       </div>
     </div>
@@ -299,7 +323,6 @@ const clearFocus = () => {
   isEmailFocused.value = false;
 };
 
-// 彻底禁止 emoji，改为返回专业图标 icon 和精简后的纯文本 text
 const hintInfo = computed(() => {
   if (show.value === 'login') {
     if (isPwdFocused.value) return { text: "闭眼啦，放心输入你的密码吧", icon: "mingcute:eye-close-fill" };
@@ -625,22 +648,23 @@ function submitRegister() {
 }
 
 /* ==========================================
-   精心调整的动态悬浮文字（解决遮挡问题）
+   精心调整的动态悬浮文字（完美上移解决遮挡）
    ========================================== */
 .hint-bubble {
   position: absolute;
   z-index: 20;
-  white-space: nowrap; /* 绝对禁止换行 */
+  white-space: nowrap; 
   display: flex;
   align-items: center;
-  gap: 8px; /* 专业图标与文字的间距 */
+  gap: 8px; 
   pointer-events: none;
   transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* ★ 关键优化：位置已从 52% 大幅提高到了 15% 位于天空部分 ★ */
 .hint-floating {
   left: 50%;
-  top: 52%;
+  top: 15%; 
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
@@ -653,9 +677,8 @@ function submitRegister() {
   border: 1px solid rgba(255,255,255,0.5);
 }
 
-/* 状态2：掉入怪物肚子里，利用绝对定位和 transform 完美居中于空白区域，永不遮挡 */
 .hint-inside {
-  left: 45%; /* 精确在橙色怪物拉长后的左侧空白部分居中 */
+  left: 45%; 
   top: 78%; 
   transform: translateX(-50%);
   background: transparent;
@@ -668,6 +691,74 @@ function submitRegister() {
   box-shadow: none;
   text-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
+
+/* ==========================================
+   博士帽小玩偶 - 跑酷与弹跳双轨动画系统
+   ========================================== */
+.doll-run {
+  /* 轨道 1：沿着三个怪兽的头顶平滑穿梭 */
+  animation: doll-run 3.5s infinite alternate ease-in-out;
+}
+
+.doll-bounce {
+  /* 轨道 2：模拟重力的弹跳效果 */
+  animation: doll-bounce 0.45s infinite alternate ease-out;
+}
+
+@keyframes doll-run {
+  0% { transform: translate(145px, 95px); }    /* 紫色怪兽上方 */
+  50% { transform: translate(192px, 145px); }  /* 黑色怪兽上方 */
+  100% { transform: translate(237px, 220px); } /* 黄色怪兽上方 */
+}
+
+@keyframes doll-bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-40px); } /* 向上跳跃高度 */
+}
+
+/* 小精灵头上的交互气泡样式 */
+.doll-speech-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 5px;
+}
+.doll-speech-bubble {
+  display: flex;
+  align-items: center;
+  background: #1890ff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(24,144,255,0.3);
+  transition: all 0.2s ease;
+  pointer-events: auto; /* 允许在这个 SVG 内使用 Hover 和 Click */
+}
+.doll-speech-bubble:hover {
+  transform: scale(1.05) translateY(-2px);
+  background: #40a9ff;
+}
+.doll-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0;
+  border-style: solid;
+  border-color: #1890ff transparent transparent transparent;
+  transition: border-color 0.2s ease;
+}
+.doll-speech-bubble:hover::after {
+  border-color: #40a9ff transparent transparent transparent;
+}
+
 
 .blinking-eyes circle {
   transform-box: fill-box;
@@ -726,7 +817,7 @@ function submitRegister() {
   }
 
   @media (max-width: 850px) {
-    display: flex; /* 仅在手机端显示此提示框 */
+    display: flex; 
   }
 }
 
